@@ -241,18 +241,21 @@ theorem boundedFormula_realize {β : Fam Sorts} {σ : Signature Sorts} (φ : L.B
     (v : β →ₛ piFam M) (xs : piFam M [^] σ) :
   φ.Realize
       (MSQuotient.mk _ ∘ₛ v)
-      (xs.toQuot (R := (ReducedProductSetoid _ u.toFilter)))
+      (MSQuotient.mk (ReducedProductSetoid _ u)  <$>ₛ xs)
     ↔ ∀ᶠ a in u.toFilter, φ.Realize ⟨fun s b ↦ v s b a⟩ (pi_lift xs a) := by
   induction φ with
   | falsum => simp only [BoundedFormula.Realize, u.eventually_const]
   | @equal _ τ t₁ t₂ =>
+    -- This cannot go out of the induction tactic because then it becomes part of the induction
+    -- hypothesis for some reason
     letI := (ReducedProductSetoid M u.toFilter)
     have h :
-        (sumElim (MSQuotient.mk _ ∘ₛ v) xs.toQuot.get) = MSQuotient.mk _ ∘ₛ (sumElim v xs.get) := by
+        (sumElim (MSQuotient.mk _ ∘ₛ v) (MSQuotient.mk (ReducedProductSetoid _ u)  <$>ₛ xs).get)
+          = MSQuotient.mk _ ∘ₛ (sumElim v xs.get) := by
       ext s b
       cases b
       · rfl
-      · simp only [sumElim_eval_r, get_toQuot, FamMap.comp_apply']
+      · simp only [get_map]
         rfl
     simp only [BoundedFormula.Realize]
     induction τ with
@@ -267,17 +270,18 @@ theorem boundedFormula_realize {β : Fam Sorts} {σ : Signature Sorts} (φ : L.B
         erw [←ReducedProduct.pi_lift_term_realize] <;>
         rfl
     | prod τ₁ τ₂ h₁ h₂ =>
-      cases t₁
-      cases t₂
-      simp [h₁, h₂]
+      rcases t₁ with ⟨τ₁⟩
+      rcases t₂ with ⟨τ₂⟩
+      simp only [Term.realize, Prod.ext_iff, h₁, h₂, u.eventually_and]
   | rel R ts =>
     letI := (ReducedProductSetoid M u.toFilter)
     have h :
-        (sumElim (MSQuotient.mk _ ∘ₛ v) xs.toQuot.get) = MSQuotient.mk _ ∘ₛ (sumElim v xs.get) := by
+        (sumElim (MSQuotient.mk _ ∘ₛ v) (MSQuotient.mk (ReducedProductSetoid _ u)  <$>ₛ xs).get)
+          = MSQuotient.mk _ ∘ₛ (sumElim v xs.get) := by
       ext s b
       cases b
       · rfl
-      · simp only [sumElim_eval_r, get_toQuot, FamMap.comp_apply']
+      · simp only [get_map]
         rfl
     simp only [BoundedFormula.Realize]
     rw [h, Term.realize_quotient_mk']

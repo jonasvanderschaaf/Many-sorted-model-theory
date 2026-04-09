@@ -551,9 +551,9 @@ noncomputable example {σ τ : Signature S} {x : α [^] σ} {y : (α /ₛ R) [^]
   ((x, MSQuotient.out <$>ₛ y) : α [^] (σ ⨯ τ))
 
 lemma weird_needs_name {σ τ : Signature S} {x : α [^] σ} {y : (α /ₛ R) [^] τ} :
-    (x.toQuot, y) = Interpret.mapClass (MSQuotient.mk R) (σ := σ ⨯ τ) (x, MSQuotient.out <$>ₛ y) := by
+    (MSQuotient.mk _  <$>ₛ x, y) =
+      Interpret.mapClass (MSQuotient.mk R) (σ := σ ⨯ τ) (x, MSQuotient.out <$>ₛ y) := by
   rw [map_prod, ←comp_map, MSQuotient.out_eq, map_id]
-  rfl
 
 /--
 Multisorted analogue of Mathlib's `Quotient.finChoice`:
